@@ -2,11 +2,7 @@
   "manifest_version": 3,
   "name": "Aether Companion",
   "version": "0.1.0",
-  "description": "Interact with the Aether platform directly from your cloud provider consoles.",
-  "permissions": [
-    "activeTab",
-    "storage"
-  ],
+  "description": "Interact with the Aether platform directly from your browser.",
   "action": {
     "default_popup": "index.html",
     "default_icon": {

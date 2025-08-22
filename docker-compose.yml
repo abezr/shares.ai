@@ -27,6 +27,62 @@ services:
     volumes:
       - neo4j_data:/data
 
+  api-gateway:
+    build:
+      context: ./packages/backend/api-gateway
+    environment:
+      - POSTGRES_URL=postgres://aether:aether@postgres:5432/aether_meta
+      - NATS_URL=nats://nats:4222
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+      - nats
+
+  orchestrator:
+    build:
+      context: ./packages/backend/orchestrator
+    environment:
+      - POSTGRES_URL=postgres://aether:aether@postgres:5432/aether_meta
+      - NATS_URL=nats://nats:4222
+    depends_on:
+      - postgres
+      - nats
+
+  agent-worker:
+    build:
+      context: ./packages/backend/agent-worker
+    environment:
+      - POSTGRES_URL=postgres://aether:aether@postgres:5432/aether_meta
+      - NATS_URL=nats://nats:4222
+      - NATS_QUEUE=generic-agent-workers
+    depends_on:
+      - postgres
+      - nats
+
+  web-console:
+    build:
+      context: ./packages/web-console
+    environment:
+      - NEXT_PUBLIC_GRAPHQL_URL=http://localhost:4000
+      - INTERNAL_GRAPHQL_URL=http://api-gateway:4000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-gateway
+
+  sgr-engine:
+    build:
+      context: ./packages/backend/sgr-engine
+    ports:
+      - "50051:50051"
+
+  mcp-registry:
+    build:
+      context: ./packages/backend/mcp-registry
+    ports:
+      - "8080:8080"
+
 volumes:
   postgres_data:
   neo4j_data:
