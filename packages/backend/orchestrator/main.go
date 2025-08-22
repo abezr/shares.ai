@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -22,6 +23,8 @@ type ServiceProfileCreatedEvent struct {
 		ServiceProfileID string                 `json:"serviceProfileId"`
 		Name             string                 `json:"name"`
 		Goals            map[string]any         `json:"goals"`
+		SourceContent    *string                `json:"source_content"`
+		TargetProvider   *string                `json:"target_provider"`
 	} `json:"data"`
 }
 
@@ -30,6 +33,14 @@ type EchoTaskEvent struct {
 	EventType string `json:"eventType"`
 	RunID     string `json:"runId"`
 	Message   string `json:"message"`
+}
+
+type ConversionTaskEvent struct {
+	EventID        string `json:"eventId"`
+	EventType      string `json:"eventType"`
+	RunID          string `json:"runId"`
+	SourceContent  string `json:"sourceContent"`
+	TargetProvider string `json:"targetProvider"`
 }
 
 func main() {
@@ -74,19 +85,36 @@ func main() {
 			return
 		}
 
-		// Publish EchoTask to agents
-		echo := EchoTaskEvent{
-			EventID:   uuid.New().String(),
-			EventType: "EchoTask",
-			RunID:     runID,
-			Message:   "Hello Agent, please process this task.",
+		// Conditional dispatch: ConversionTask when source and target provided; else EchoTask
+		if evt.Data.SourceContent != nil && evt.Data.TargetProvider != nil &&
+			strings.TrimSpace(*evt.Data.SourceContent) != "" && strings.TrimSpace(*evt.Data.TargetProvider) != "" {
+			conv := ConversionTaskEvent{
+				EventID:        uuid.New().String(),
+				EventType:      "ConversionTask",
+				RunID:          runID,
+				SourceContent:  *evt.Data.SourceContent,
+				TargetProvider: *evt.Data.TargetProvider,
+			}
+			payload, _ := json.Marshal(conv)
+			if err := nc.Publish("aether.agent.tasks", payload); err != nil {
+				log.Printf("failed to publish ConversionTask: %v", err)
+				return
+			}
+			log.Printf("Published ConversionTask for run: %s", runID)
+		} else {
+			echo := EchoTaskEvent{
+				EventID:   uuid.New().String(),
+				EventType: "EchoTask",
+				RunID:     runID,
+				Message:   "Hello Agent, please process this task.",
+			}
+			payload, _ := json.Marshal(echo)
+			if err := nc.Publish("aether.agent.tasks", payload); err != nil {
+				log.Printf("failed to publish EchoTask: %v", err)
+				return
+			}
+			log.Printf("Published EchoTask for run: %s", runID)
 		}
-		payload, _ := json.Marshal(echo)
-		if err := nc.Publish("aether.agent.tasks", payload); err != nil {
-			log.Printf("failed to publish EchoTask: %v", err)
-			return
-		}
-		log.Printf("Published EchoTask for run: %s", runID)
 	})
 	if err != nil {
 		log.Fatalf("failed to subscribe: %v", err)
