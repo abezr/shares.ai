@@ -1,0 +1,9 @@
+
+{
+  "name": "backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "db:migrate": "docker run --rm -v %cd%/db/migrations:/flyway/sql -v %cd%/flyway.conf:/flyway/conf/flyway.conf flyway/flyway:10 -configFiles=/flyway/conf/flyway.conf migrate"
+  }
+}

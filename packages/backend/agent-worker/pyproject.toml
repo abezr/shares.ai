@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-worker"
+version = "0.1.0"
+description = "Generic Agent Worker for Aether"
+authors = [{ name = "Aether" }]
+requires-python = ">=3.11"
+dependencies = [
+  "nats-py>=2.5.0",
+  "asyncpg>=0.29.0"
+]
+
+[project.scripts]
+agent-worker = "agent_worker.main:main"

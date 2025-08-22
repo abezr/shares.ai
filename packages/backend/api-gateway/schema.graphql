@@ -1,0 +1,19 @@
+scalar JSON
+
+type ServiceProfile {
+  id: ID!
+  name: String!
+  goals: JSON!
+  source_content: String
+  target_provider: String
+  created_at: String!
+  updated_at: String!
+}
+
+type Query {
+  _health: String!
+}
+
+type Mutation {
+  createServiceProfile(name: String!, goals: JSON!, source_content: String, target_provider: String): ServiceProfile!
+}

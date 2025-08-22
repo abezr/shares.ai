@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package sgr;
+
+service SGRService {
+  rpc ReasonWithSchema (ReasoningRequest) returns (ReasoningResponse) {}
+}
+
+message ReasoningRequest {
+  string source_content = 1;
+  string target_provider = 2;
+}
+
+message ReasoningResponse {
+  string status = 1;
+  string explanation = 2;
+  string generated_content = 3;
+}
