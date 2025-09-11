@@ -11,32 +11,30 @@ Aether is a distributed system built on a microservices architecture, orchestrat
 *For a high-level view, see the System Context Diagram below.*
 
 ```mermaid
-C4Context
-  title [Aether] C1: System Context Diagram
+flowchart TB
+  user["Platform User / Operator"]
 
-  Person(user, "Platform User / Operator", "Defines infrastructure goals, manages services, and reviews agent actions.")
-  
-  System_Boundary(agent_actors, "Aether AI Agents") {
-    Person(infra_agent, "Infrastructure Agent", "Performs conversions.")
-    Person(validation_agent, "Validation Agent", "Verifies correctness.")
-    Person(optimizer_agent, "Optimizer Agent", "Improves cost/performance.")
-    Person(security_agent, "Security Agent", "Enforces policy.")
-  }
+  subgraph agent_actors["Aether AI Agents"]
+    infra_agent["Infrastructure Agent"]
+    validation_agent["Validation Agent"]
+    optimizer_agent["Optimizer Agent"]
+    security_agent["Security Agent"]
+  end
 
-  System(aether, "Aether Platform", "The central control plane for goal-seeking infrastructure automation, agent orchestration, and knowledge management.")
+  aether["Aether Platform"]
 
-  System_Ext(providers, "Cloud & Service Providers", "AWS, GCP, Vercel, Cloudflare, etc. The target environments for deployment.")
-  System_Ext(mcp_servers, "MCP Servers", "Provider-specific APIs, security scanners, cost calculators, and validation tools.")
-  System_Ext(data_sources, "Community Data Sources", "GitHub, IaC Registries, Blogs. Used for agent training and knowledge graph enrichment.")
+  providers(["Cloud & Service Providers"])
+  mcp_servers(["MCP Servers"])
+  data_sources(["Community Data Sources"])
 
-  Rel(user, aether, "Uses to manage infrastructure goals")
-  Rel(aether, agent_actors, "Orchestrates and Dispatches Tasks to")
-  Rel(agent_actors, aether, "Reports Status, Logs, and Validation Results")
-  
-  Rel(agent_actors, mcp_servers, "Connects to for specific tasks", "API")
-  Rel(agent_actors, providers, "Deploys and Manages Resources on", "API")
-  
-  Rel(aether, data_sources, "Collects data from for training")
+  user -->|"Uses to manage infrastructure goals"| aether
+  aether -->|"Orchestrates and dispatches tasks to"| agent_actors
+  agent_actors -->|"Reports status, logs, and validation results"| aether
+
+  agent_actors -->|"Connects to for specific tasks"| mcp_servers
+  agent_actors -->|"Deploys and manages resources on"| providers
+
+  aether -->|"Collects data from for training"| data_sources
 ```
 
 ### ✨ Key Features
